@@ -30,8 +30,13 @@ import org.checkerframework.common.value.qual.IntRange;
 import org.geysermc.api.util.BedrockPlatform;
 import org.geysermc.api.util.InputMode;
 import org.geysermc.api.util.UiProfile;
+import org.geysermc.cumulus.datadrivenui.DataDrivenCapabilities;
+import org.geysermc.cumulus.datadrivenui.DataDrivenForm;
+import org.geysermc.cumulus.datadrivenui.DataDrivenMessageBox;
+import org.geysermc.cumulus.datadrivenui.DataDrivenSession;
 import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.util.FormBuilder;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -107,6 +112,53 @@ public interface Connection {
      * @return whether the form was successfully sent
      */
     boolean sendForm(FormBuilder<?, ?, ?> formBuilder);
+
+    /**
+     * Returns what this connection can do with data-driven forms. Check this before building one;
+     * when the state isn't {@link DataDrivenCapabilities.State#SUPPORTED}, fall back to a regular
+     * {@link Form}.
+     *
+     * @return what this connection can do with data-driven forms
+     * @since 1.1.0
+     */
+    default DataDrivenCapabilities dataDrivenCapabilities() {
+        return DataDrivenCapabilities.unsupported();
+    }
+
+    /**
+     * Shows a data-driven form on the connection.
+     *
+     * <p>The form stays live while it is open: its buttons run their callbacks without closing it,
+     * the player's edits arrive through its observables, and setting those observables changes what
+     * the player sees. How it ends is reported to the form's close callback; the returned session
+     * only closes it early.
+     *
+     * @param form the form to show; a form is built for one showing
+     * @return a handle to the showing, or null when this connection doesn't support data-driven
+     *         forms, which {@link #dataDrivenCapabilities()} says in advance
+     * @throws IllegalStateException when the form has already been shown
+     * @throws IllegalArgumentException when the form holds a component this connection cannot
+     *         show, which {@link #dataDrivenCapabilities()} says in advance
+     * @since 1.1.0
+     */
+    default @Nullable DataDrivenSession showForm(DataDrivenForm form) {
+        return null;
+    }
+
+    /**
+     * Shows a data-driven message box on the connection.
+     *
+     * <p>How it ends, with which button if any, is reported to its result handler.
+     *
+     * @param messageBox the message box to show; built for one showing
+     * @return a handle to the showing, or null when this connection doesn't support data-driven
+     *         forms, which {@link #dataDrivenCapabilities()} says in advance
+     * @throws IllegalStateException when the message box has already been shown
+     * @since 1.1.0
+     */
+    default @Nullable DataDrivenSession showMessageBox(DataDrivenMessageBox messageBox) {
+        return null;
+    }
 
     /**
      * Transfer the connection to a server. A Bedrock player can successfully transfer to the same server they are

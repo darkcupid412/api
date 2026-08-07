@@ -1,7 +1,7 @@
 [versions]
 checkerframework = "3.19.0"
 jspecify = "1.0.0"
-cumulus  = "1.1.2"
+cumulus  = "2.0.0-SNAPSHOT"
 events = "1.1-SNAPSHOT"
 blossom = "2.1.0"
 indra = "3.0.1"
